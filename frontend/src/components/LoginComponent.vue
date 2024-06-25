@@ -53,7 +53,7 @@ export default {
           password: this.password
         });
 
-        await this.login();
+        this.login();
       } catch (error) {
         console.error('Error register:', error.response.data.error);
         this.error = '註冊失敗，請重試。';

@@ -18,7 +18,7 @@ app.use(session({
   secret: 'M9eQiIjGeNt6VowaUvSU',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }));
 
 const db = new sqlite3.Database('./database.sqlite', (err) => {
@@ -49,7 +49,7 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
 // Register
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
-  db.run(`INSERT INTO users (email, password) VALUES (?, ?)`, [email, password], (err) => {
+  db.run(`INSERT INTO users (email, password) VALUES (?, ?)`, [email, password], function (err) {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -73,7 +73,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// 驗證登入狀態的中間件
+// Authentication Model
 const authMiddleware = (req, res, next) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -81,7 +81,7 @@ const authMiddleware = (req, res, next) => {
   next();
 };
 
-// 新增待辦事項 API
+// Add Task
 app.post('/todos', authMiddleware, (req, res) => {
   const { task, deadline, category } = req.body;
   const user_id = req.session.userId;
@@ -93,7 +93,7 @@ app.post('/todos', authMiddleware, (req, res) => {
   });
 });
 
-// 取得待辦事項 API
+// Fetch Tasks
 app.get('/todos', authMiddleware, (req, res) => {
   const user_id = req.session.userId;
   db.all(`SELECT * FROM todos WHERE user_id = ?`, [user_id], (err, rows) => {
